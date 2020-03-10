@@ -6,8 +6,15 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import com.devbrackets.android.exomedia.ExoMedia;
 import com.devbrackets.android.exomedia.core.api.VideoViewApi;
@@ -66,6 +73,23 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
         return instance;
     }
 
+    private static String getMd5Hash(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            BigInteger number = new BigInteger(1, messageDigest);
+            String md5 = number.toString(16);
+
+            while (md5.length() < 32)
+                md5 = "0" + md5;
+
+            return md5;
+        } catch (NoSuchAlgorithmException e) {
+            Log.e("MD5", e.getLocalizedMessage());
+            return null;
+        }
+    }
+
     public static void init(final Application application) {
         if (instance != null) {
             instance.invokeStop();
@@ -79,13 +103,26 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
         ExoMedia.setDataSourceFactoryProvider(new ExoMedia.DataSourceFactoryProvider() {
             @Override
             public DataSource.Factory provide(String userAgent, TransferListener listener) {
+                String deviceId = Settings.Secure.getString(application.getContentResolver(),Settings.Secure.ANDROID_ID);
+                String deviceIdMd5 = getMd5Hash(deviceId);
+                String version = "";
+                try {
+                    PackageInfo pInfo = application.getPackageManager().getPackageInfo(application.getPackageName(), 0);
+                    version = pInfo.versionName;
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                String ua = "Mplayer-" + version + "-" + deviceIdMd5.substring(21, 29) + deviceIdMd5.substring(6, 17);
+
+
                 // Updates the network data source to use the OKHttp implementation and allows it to follow redirects
                 OkHttpClient httpClient = new OkHttpClient().newBuilder().followRedirects(true).followSslRedirects(true).build();
-                DataSource.Factory upstreamFactory = new OkHttpDataSourceFactory(httpClient, userAgent, listener);
+                DataSource.Factory upstreamFactory = new OkHttpDataSourceFactory(httpClient, ua, listener);
 
                 // Adds a cache around the upstreamFactory.
                 // This sets a cache of 100MB, we might make this configurable.
-                Cache cache = new SimpleCache(application.getCacheDir(), new LeastRecentlyUsedCacheEvictor(100 * 1024 * 1024));
+                Cache cache = new SimpleCache(application.getCacheDir(), new LeastRecentlyUsedCacheEvictor(500 * 1024 * 1024));
                 return new CacheDataSourceFactory(cache, upstreamFactory, CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR);
             }
         });
