@@ -115,7 +115,7 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
 
                 String ua = "Mplayer-" + version + "-" + deviceIdMd5.substring(21, 29) + deviceIdMd5.substring(6, 17);
 
-
+                Log.i("MD5 - User-Agent", ua);
                 // Updates the network data source to use the OKHttp implementation and allows it to follow redirects
                 OkHttpClient httpClient = new OkHttpClient().newBuilder().followRedirects(true).followSslRedirects(true).build();
                 DataSource.Factory upstreamFactory = new OkHttpDataSourceFactory(httpClient, ua, listener);
