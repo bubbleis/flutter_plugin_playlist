@@ -16,6 +16,7 @@ class _MyAppState extends State<MyApp> {
 
   int _current = 0;
   int _total = 0;
+  bool loopT = false;
 
   String _status = 'none';
 
@@ -61,17 +62,18 @@ class _MyAppState extends State<MyApp> {
           album: "Friends",
           artist: "Bon Jovi",
           assetUrl:
-          "https://www.soundboard.com/mediafiles/22/223554-d1826dea-bfc3-477b-a316-20ded5e63e08.mp3",
+              "https://www.soundboard.com/mediafiles/22/223554-d1826dea-bfc3-477b-a316-20ded5e63e08.mp3",
           title: "I'll be there for you"),
       new AudioTrack(
           album: "Friends",
           artist: "Ross",
           assetUrl:
-          "https://www.soundboard.com/mediafiles/22/223554-fea5dfff-6c80-4e13-b0cf-9926198f50f3.mp3",
+              "https://www.soundboard.com/mediafiles/22/223554-fea5dfff-6c80-4e13-b0cf-9926198f50f3.mp3",
           title: "The Sound"),
     ]);
 
     await rmxAudioPlayer.setLoop(true);
+    await rmxAudioPlayer.setLoopTrack(loopT);
 
     await _play();
   }
@@ -175,6 +177,15 @@ class _MyAppState extends State<MyApp> {
                   icon: _icon(),
                 ),
                 IconButton(
+                  onPressed: () {
+                    setState(() {
+                      loopT = !loopT;
+                      rmxAudioPlayer.setLoopTrack(loopT);
+                    });
+                  },
+                  icon: _repeatIcon(),
+                ),
+                IconButton(
                   onPressed: rmxAudioPlayer.skipForward,
                   icon: const Icon(Icons.skip_next),
                 ),
@@ -233,5 +244,9 @@ class _MyAppState extends State<MyApp> {
     }
 
     return const Icon(Icons.play_circle_outline);
+  }
+
+  Widget _repeatIcon() {
+    return Icon(loopT ? Icons.repeat_one : Icons.repeat);
   }
 }

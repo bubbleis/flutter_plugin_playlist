@@ -29,10 +29,9 @@ import io.flutter.util.PathUtils;
 
 /**
  *
- * The core Cordova interface for the audio player
- * TODO: Move the proxied calls audioPlayerImpl.getPlaylistManager()
- * into the audio player class itself so the plugin doesn't know about
- * the playlist manager.
+ * The core Cordova interface for the audio player TODO: Move the proxied calls
+ * audioPlayerImpl.getPlaylistManager() into the audio player class itself so
+ * the plugin doesn't know about the playlist manager.
  *
  */
 public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConstants, OnStatusReportListener {
@@ -45,7 +44,7 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
   private boolean resetStreamOnPause = true;
 
   private FlutterPluginPlaylistPlugin(MethodChannel channel) {
-      this.channel = channel;
+    this.channel = channel;
   }
 
   /** Plugin registration. */
@@ -204,18 +203,20 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
     if (PLAY.equals(action)) {
       if (audioPlayerImpl.getPlaylistManager().getPlaylistHandler() != null) {
         boolean isPlaying = audioPlayerImpl.getPlaylistManager().getPlaylistHandler().getCurrentMediaPlayer() != null
-                && audioPlayerImpl.getPlaylistManager().getPlaylistHandler().getCurrentMediaPlayer().isPlaying();
-        // There's a bug in the threaded repeater that it stacks up the repeat calls instead of ignoring
-        // additional ones or starting a new one. E.g. every time this is called, you'd get a new repeat cycle,
+            && audioPlayerImpl.getPlaylistManager().getPlaylistHandler().getCurrentMediaPlayer().isPlaying();
+        // There's a bug in the threaded repeater that it stacks up the repeat calls
+        // instead of ignoring
+        // additional ones or starting a new one. E.g. every time this is called, you'd
+        // get a new repeat cycle,
         // meaning you get N updates per second. Ew.
         if (!isPlaying) {
           audioPlayerImpl.getPlaylistManager().getPlaylistHandler().play();
-          //audioPlayerImpl.getPlaylistManager().getPlaylistHandler().seek(position);
+          // audioPlayerImpl.getPlaylistManager().getPlaylistHandler().seek(position);
 
           if (audioPlayerImpl.getPlaylistManager().getCurrentItem() != null) {
             onStatus(RmxAudioStatusMessage.RMXSTATUS_PLAYING,
-                    audioPlayerImpl.getPlaylistManager().getCurrentItem().getTrackId(),
-                    audioPlayerImpl.getPlayerStatus(audioPlayerImpl.getPlaylistManager().getCurrentItem()));
+                audioPlayerImpl.getPlaylistManager().getCurrentItem().getTrackId(),
+                audioPlayerImpl.getPlayerStatus(audioPlayerImpl.getPlaylistManager().getCurrentItem()));
           }
         }
 
@@ -225,7 +226,7 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
           result.success(null);
         }
 
-      } else if (audioPlayerImpl.getPlaylistManager().getItemCount() > 0){
+      } else if (audioPlayerImpl.getPlaylistManager().getItemCount() > 0) {
         audioPlayerImpl.getPlaylistManager().setCurrentPosition(0);
         audioPlayerImpl.getPlaylistManager().beginPlayback(0, false);
       } else {
@@ -233,8 +234,9 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
       }
     } else if (PLAY_BY_INDEX.equals(action)) {
       Map<String, Object> args = (Map<String, Object>) call.arguments;
-      int index = option((Number) args.get("index"), audioPlayerImpl.getPlaylistManager().getCurrentPosition()).intValue();
-      long seekPosition = (long)(option((Number) args.get("position"), 0).longValue() * 1000.0);
+      int index = option((Number) args.get("index"), audioPlayerImpl.getPlaylistManager().getCurrentPosition())
+          .intValue();
+      long seekPosition = (long) (option((Number) args.get("position"), 0).longValue() * 1000.0);
 
       audioPlayerImpl.getPlaylistManager().setCurrentPosition(index);
       audioPlayerImpl.getPlaylistManager().beginPlayback(seekPosition, false);
@@ -243,9 +245,10 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
       Map<String, Object> args = (Map<String, Object>) call.arguments;
       String trackId = (String) args.get("trackId");
       if (!"".equals((trackId))) {
-        // alternatively we could search for the item and set the current index to that item.
+        // alternatively we could search for the item and set the current index to that
+        // item.
         int code = trackId.hashCode();
-        long seekPosition = (long)(option((Number) args.get("position"), 0).longValue() * 1000.0);
+        long seekPosition = (long) (option((Number) args.get("position"), 0).longValue() * 1000.0);
         audioPlayerImpl.getPlaylistManager().setCurrentItem(code);
         audioPlayerImpl.getPlaylistManager().beginPlayback(seekPosition, false);
       }
@@ -265,8 +268,10 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
       result.success(true);
     } else
 
-    // On Android, the duration, playback position, etc are in milliseconds as whole numbers.
-    // On iOS, it uses seconds as floats, e.g. 63.3 seconds. So we need to convert here.
+    // On Android, the duration, playback position, etc are in milliseconds as whole
+    // numbers.
+    // On iOS, it uses seconds as floats, e.g. 63.3 seconds. So we need to convert
+    // here.
 
     if (SEEK.equals(action)) {
       long position = 0;
@@ -277,7 +282,8 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
       long positionVal = (long) (option((Number) call.arguments, position / 1000.0f).floatValue() * 1000.0);
 
       if (audioPlayerImpl.getPlaylistManager().getPlaylistHandler() != null) { // isPlaying &&
-        boolean isPlaying = audioPlayerImpl.getPlaylistManager().getPlaylistHandler().getCurrentMediaPlayer().isPlaying();
+        boolean isPlaying = audioPlayerImpl.getPlaylistManager().getPlaylistHandler().getCurrentMediaPlayer()
+            .isPlaying();
         audioPlayerImpl.getPlaylistManager().getPlaylistHandler().seek(positionVal);
         if (!isPlaying) {
           audioPlayerImpl.getPlaylistManager().getPlaylistHandler().pause(false);
@@ -293,7 +299,8 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
       // Not supported at the moment
       result.success(true);
     } else if (SET_PLAYBACK_RATE.equals(action)) {
-      float speed = option(((Number) call.arguments), audioPlayerImpl.getPlaylistManager().getPlaybackSpeed()).floatValue();
+      float speed = option(((Number) call.arguments), audioPlayerImpl.getPlaylistManager().getPlaybackSpeed())
+          .floatValue();
       audioPlayerImpl.getPlaylistManager().setPlaybackSpeed(speed);
       result.success(true);
     } else if (SET_PLAYBACK_VOLUME.equals(action)) {
@@ -303,6 +310,10 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
     } else if (SET_LOOP_ALL.equals(action)) {
       Boolean loop = option(((Boolean) call.arguments), audioPlayerImpl.getPlaylistManager().getLoop());
       audioPlayerImpl.getPlaylistManager().setLoop(loop);
+      result.success(true);
+    } else if (SET_LOOP_TRACK.equals(action)) {
+      Boolean loop = option(((Boolean) call.arguments), audioPlayerImpl.getPlaylistManager().getLoopTrack());
+      audioPlayerImpl.getPlaylistManager().setLoopTrack(loop);
       result.success(true);
     } else
 
@@ -322,8 +333,10 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
     } else if (GET_BUFFER_STATUS.equals(action)) {
       result.success(audioPlayerImpl.getPlayerStatus(null));
     } else if (GET_QUEUE_POSITION.equals(action)) {
-      // Not yet implemented on android. I'm not sure how to, since the tracks haven't loaded yet.
-      // On iOS, the AVQueuePlayer gets the metadata for all tracks immediately, that's why that works there.
+      // Not yet implemented on android. I'm not sure how to, since the tracks haven't
+      // loaded yet.
+      // On iOS, the AVQueuePlayer gets the metadata for all tracks immediately,
+      // that's why that works there.
       float queuePosition = 0f;
       result.success(queuePosition);
     } else {

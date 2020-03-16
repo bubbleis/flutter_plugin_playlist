@@ -42,8 +42,9 @@ import org.gafs.flutter_plugin_playlist.service.MediaService;
 import okhttp3.OkHttpClient;
 
 /**
- * A PlaylistManager that extends the {@link ListPlaylistManager} for use with the
- * {@link MediaService} which extends {@link com.devbrackets.android.playlistcore.service.BasePlaylistService}.
+ * A PlaylistManager that extends the {@link ListPlaylistManager} for use with
+ * the {@link MediaService} which extends
+ * {@link com.devbrackets.android.playlistcore.service.BasePlaylistService}.
  */
 public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements OnErrorListener {
 
@@ -57,6 +58,7 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
     private float volumeRight = 1.0f;
     private float playbackSpeed = 1.0f;
     private boolean loop = false;
+    private boolean loopt = false;
     private boolean shouldStopPlaylist = false;
     private boolean previousInvoked = false;
     private boolean nextInvoked = false;
@@ -98,12 +100,15 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
 
         instance = new PlaylistManager(application);
 
-        // Registers the media sources to use the OkHttp client instead of the standard Apache one
-        // Note: the OkHttpDataSourceFactory can be found in the ExoPlayer extension library `extension-okhttp`
+        // Registers the media sources to use the OkHttp client instead of the standard
+        // Apache one
+        // Note: the OkHttpDataSourceFactory can be found in the ExoPlayer extension
+        // library `extension-okhttp`
         ExoMedia.setDataSourceFactoryProvider(new ExoMedia.DataSourceFactoryProvider() {
             @Override
             public DataSource.Factory provide(String userAgent, TransferListener listener) {
-                String deviceId = Settings.Secure.getString(application.getContentResolver(),Settings.Secure.ANDROID_ID);
+                String deviceId = Settings.Secure.getString(application.getContentResolver(),
+                        Settings.Secure.ANDROID_ID);
                 String deviceIdMd5 = getMd5Hash(deviceId);
                 String version = "";
                 try {
@@ -116,13 +121,16 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
                 String ua = "Mplayer-" + version + "-" + deviceIdMd5.substring(21, 29) + deviceIdMd5.substring(6, 17);
 
                 Log.v("MD5 - User-Agent", ua);
-                // Updates the network data source to use the OKHttp implementation and allows it to follow redirects
-                OkHttpClient httpClient = new OkHttpClient().newBuilder().followRedirects(true).followSslRedirects(true).build();
+                // Updates the network data source to use the OKHttp implementation and allows
+                // it to follow redirects
+                OkHttpClient httpClient = new OkHttpClient().newBuilder().followRedirects(true).followSslRedirects(true)
+                        .build();
                 DataSource.Factory upstreamFactory = new OkHttpDataSourceFactory(httpClient, ua, listener);
 
                 // Adds a cache around the upstreamFactory.
                 // This sets a cache of 100MB, we might make this configurable.
-                Cache cache = new SimpleCache(application.getCacheDir(), new LeastRecentlyUsedCacheEvictor(500 * 1024 * 1024));
+                Cache cache = new SimpleCache(application.getCacheDir(),
+                        new LeastRecentlyUsedCacheEvictor(500 * 1024 * 1024));
                 return new CacheDataSourceFactory(cache, upstreamFactory, CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR);
             }
         });
@@ -212,7 +220,8 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
     }
 
     public boolean isPlaying() {
-        return getPlaylistHandler() != null && getPlaylistHandler().getCurrentMediaPlayer() != null && getPlaylistHandler().getCurrentMediaPlayer().isPlaying();
+        return getPlaylistHandler() != null && getPlaylistHandler().getCurrentMediaPlayer() != null
+                && getPlaylistHandler().getCurrentMediaPlayer().isPlaying();
     }
 
     @Override
@@ -233,10 +242,10 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
     }
 
     /*
-     * isNextAvailable, getCurrentItem, and next() are overridden because there is
-     * a glaring bug in playlist core where when an item completes, isNextAvailable and
-     * getCurrentItem return wildly contradictory things, resulting in endless repeat
-     * of the last item in the playlist.
+     * isNextAvailable, getCurrentItem, and next() are overridden because there is a
+     * glaring bug in playlist core where when an item completes, isNextAvailable
+     * and getCurrentItem return wildly contradictory things, resulting in endless
+     * repeat of the last item in the playlist.
      */
 
     @Override
@@ -273,6 +282,7 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
 
             if (loop) {
                 setCurrentPosition((getCurrentPosition() + getItemCount() - 1) % getItemCount());
+                // setCurrentPosition(getCurrentPosition());
             } else {
                 setCurrentPosition(Math.max(0, getCurrentPosition() - 1));
             }
@@ -292,9 +302,12 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
 
     @Override
     public AudioTrack next() {
-        if (isNextAvailable()) {
-            if(loop) {
+        if (loop && loopt) {
+            setCurrentPosition(getCurrentPosition());
+        } else if (isNextAvailable()) {
+            if (loop) {
                 setCurrentPosition((getCurrentPosition() + getItemCount() + 1) % getItemCount());
+                // setCurrentPosition(getCurrentPosition());
             } else {
                 setCurrentPosition(Math.min(getCurrentPosition() + 1, getItemCount()));
             }
@@ -322,7 +335,6 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
         }
         nextInvoked = false;
     }
-
 
     /*
      * List management
@@ -469,6 +481,14 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
         loop = newLoop;
     }
 
+    public boolean getLoopTrack() {
+        return loopt;
+    }
+
+    public void setLoopTrack(boolean loopTrack) {
+        loopt = loopTrack;
+    }
+
     public float getVolumeLeft() {
         return volumeLeft;
     }
@@ -493,7 +513,8 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
 
     public void setPlaybackSpeed(float speed) {
         playbackSpeed = speed;
-        if (currentMediaPlayer != null && currentMediaPlayer.get() != null && currentMediaPlayer.get() instanceof AudioApi) {
+        if (currentMediaPlayer != null && currentMediaPlayer.get() != null
+                && currentMediaPlayer.get() instanceof AudioApi) {
             Log.i("PlaylistManager", "setPlaybackSpeed completing with speed = " + speed);
             ((AudioApi) currentMediaPlayer.get()).setPlaybackSpeed(playbackSpeed);
         }
@@ -513,6 +534,7 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
     // we could do that here, following the example set by ExoMedia:
     // https://github.com/brianwernick/ExoMedia/blob/master/demo/src/main/java/com/devbrackets/android/exomediademo/manager/PlaylistManager.java
     // For this plugin's purposes (and in ExoMedia's audio demo) there is no need
-    // to present audio controls, because that is done via the local notification and lock screen.
+    // to present audio controls, because that is done via the local notification
+    // and lock screen.
 
 }

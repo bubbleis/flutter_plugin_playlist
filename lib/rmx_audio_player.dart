@@ -281,6 +281,10 @@ class RmxAudioPlayer {
     return _exec('setLoopAll', loop);
   }
 
+  Future<dynamic> setLoopTrack(bool loop) {
+    return _exec('setLoopTrack', loop);
+  }
+
   /// Get accessors
 
   /// Reports the current playback rate.
