@@ -3,6 +3,7 @@ package org.gafs.flutter_plugin_playlist.manager;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Random;
 
 import android.app.Activity;
 import android.app.Application;
@@ -59,6 +60,7 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
     private float playbackSpeed = 1.0f;
     private boolean loop = false;
     private boolean loopt = false;
+    private boolean shuffle = false;
     private boolean shouldStopPlaylist = false;
     private boolean previousInvoked = false;
     private boolean nextInvoked = false;
@@ -279,7 +281,9 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
             getPlaylistHandler().seek(0L);
             return getCurrentItem();
         } else {
-            if (loop && loopt) {
+            if (shuffle) {
+                setCurrentPosition(getRandomNumberInRange(0, getItemCount() - 1));
+            } else if (loop && loopt) {
                 setCurrentPosition(getCurrentPosition());
             } else if (loop) {
                 setCurrentPosition((getCurrentPosition() + getItemCount() - 1) % getItemCount());
@@ -303,7 +307,9 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
 
     @Override
     public AudioTrack next() {
-        if (loop && loopt) {
+        if (shuffle) {
+            setCurrentPosition(getRandomNumberInRange(0, getItemCount() - 1));
+        } else if (loop && loopt) {
             setCurrentPosition(getCurrentPosition());
         } else if (isNextAvailable()) {
             if (loop) {
@@ -472,6 +478,24 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
             }
         }
         return resolvedPosition;
+    }
+
+    private static int getRandomNumberInRange(int min, int max) {
+
+        if (min >= max) {
+            throw new IllegalArgumentException("max must be greater than min");
+        }
+
+        Random r = new Random();
+        return r.nextInt((max - min) + 1) + min;
+    }
+
+    public void setShuffle(boolean newShuffle) {
+        shuffle = newShuffle;
+    }
+
+    public boolean getShuffle() {
+        return shuffle;
     }
 
     public boolean getLoop() {

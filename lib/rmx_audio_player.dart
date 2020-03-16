@@ -285,6 +285,10 @@ class RmxAudioPlayer {
     return _exec('setLoopTrack', loop);
   }
 
+  Future<dynamic> setShuffle(bool shuffle) {
+    return _exec('setShuffle', shuffle);
+  }
+
   /// Get accessors
 
   /// Reports the current playback rate.

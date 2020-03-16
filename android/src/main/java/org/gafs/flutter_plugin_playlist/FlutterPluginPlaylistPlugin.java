@@ -315,6 +315,10 @@ public class FlutterPluginPlaylistPlugin implements MethodCallHandler, RmxConsta
       Boolean loop = option(((Boolean) call.arguments), audioPlayerImpl.getPlaylistManager().getLoopTrack());
       audioPlayerImpl.getPlaylistManager().setLoopTrack(loop);
       result.success(true);
+    } else if (SET_SHUFFLE.equals(action)) {
+      Boolean shuffle = option(((Boolean) call.arguments), audioPlayerImpl.getPlaylistManager().getShuffle());
+      audioPlayerImpl.getPlaylistManager().setShuffle(shuffle);
+      result.success(true);
     } else
 
     // Getters

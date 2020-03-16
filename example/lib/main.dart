@@ -180,7 +180,7 @@ class _MyAppState extends State<MyApp> {
                   onPressed: () {
                     setState(() {
                       loopT = !loopT;
-                      rmxAudioPlayer.setLoopTrack(loopT);
+                      rmxAudioPlayer.setShuffle(loopT);
                     });
                   },
                   icon: _repeatIcon(),

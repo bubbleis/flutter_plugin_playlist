@@ -30,6 +30,7 @@ public interface RmxConstants {
   String SET_PLAYBACK_VOLUME = "setPlaybackVolume";
   String SET_LOOP_ALL = "setLoopAll";
   String SET_LOOP_TRACK = "setLoopTrack";
+  String SET_SHUFFLE = "setShuffle";
 
   // Getters, should almost always be unneeded since the status is continually
   // reported.
