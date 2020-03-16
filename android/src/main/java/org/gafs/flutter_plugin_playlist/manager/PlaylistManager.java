@@ -279,8 +279,9 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
             getPlaylistHandler().seek(0L);
             return getCurrentItem();
         } else {
-
-            if (loop) {
+            if (loop && loopt) {
+                setCurrentPosition(getCurrentPosition());
+            } else if (loop) {
                 setCurrentPosition((getCurrentPosition() + getItemCount() - 1) % getItemCount());
                 // setCurrentPosition(getCurrentPosition());
             } else {
