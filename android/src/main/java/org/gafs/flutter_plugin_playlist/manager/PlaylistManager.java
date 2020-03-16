@@ -282,7 +282,10 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
             return getCurrentItem();
         } else {
             if (shuffle) {
-                setCurrentPosition(getRandomNumberInRange(0, getItemCount() - 1));
+                if (getItemCount() == 1)
+                    setCurrentPosition(0);
+                else
+                    setCurrentPosition(getRandomNumberInRange(0, getItemCount() - 1));
             } else if (loop && loopt) {
                 setCurrentPosition(getCurrentPosition());
             } else if (loop) {
@@ -308,7 +311,10 @@ public class PlaylistManager extends ListPlaylistManager<AudioTrack> implements 
     @Override
     public AudioTrack next() {
         if (shuffle) {
-            setCurrentPosition(getRandomNumberInRange(0, getItemCount() - 1));
+            if (getItemCount() == 1)
+                setCurrentPosition(0);
+            else
+                setCurrentPosition(getRandomNumberInRange(0, getItemCount() - 1));
         } else if (loop && loopt) {
             setCurrentPosition(getCurrentPosition());
         } else if (isNextAvailable()) {
